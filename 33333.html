@@ -1,0 +1,233 @@
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quer ser minha amiga, Tabita?!</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Fundo dark gótico */
+    body {
+      background: #000000;
+      margin: 0;
+      height: 100vh;
+      font-family: 'Georgia', serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Estilo do card central */
+    .card {
+      background: rgba(20, 20, 20, 0.85);
+      border: 2px solid #800000;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 0 20px #ff000033;
+    }
+
+    /* Pergunta principal */
+    .question p {
+      font-size: 28px;
+      color: #b30000; /* vermelho sangue */
+      text-shadow: 2px 2px 6px #000000;
+      margin-bottom: 20px;
+      font-family: 'Cinzel', serif;
+      letter-spacing: 1px;
+    }
+
+    /* Botões */
+    .buttons button {
+      font-size: 18px;
+      padding: 10px 25px;
+      margin: 10px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: 0.3s;
+      font-family: 'Georgia', serif;
+    }
+
+    .btn-yes {
+      background: #4d0000;
+      color: #fff;
+    }
+    .btn-yes:hover {
+      background: #800000;
+    }
+
+    .btn-no {
+      background: #333;
+      color: #fff;
+      position: absolute;
+      transition: all 0.3s ease;
+    }
+    .btn-no:hover {
+      background: #555;
+    }
+
+    /* Container das caveiras */
+    #skulls-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: -1;
+    }
+
+    /* Caveiras caindo */
+    .skull {
+      position: absolute;
+      font-size: 26px;
+      color: #fff;
+      animation: fall linear infinite;
+      text-shadow: 0 0 5px #ff0000;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* Texto resposta */
+    .answer p {
+      font-size: 17px;
+      color: #ddd;
+      text-shadow: 1px 1px 3px #000;
+      font-family: 'Georgia', serif;
+    }
+
+    /* Mensagens ao clicar no "Não" */
+    .no-message {
+      position: absolute;
+      background: rgba(20, 0, 0, 0.9);
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 14px;
+      color: #ff0000;
+      animation: fadeOut 2s forwards;
+      pointer-events: none;
+      border: 1px solid #800000;
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Caveiras caindo -->
+  <div id="skulls-container"></div>
+
+  <div class="card" id="card">
+    <div class="question" id="question">
+      <p>Quer ser minha amiga?</p>
+      <div class="buttons">
+        <button id="yes" class="btn-yes">Sim!</button>
+        <button id="no" class="btn-no">Não</button>
+      </div>
+    </div>
+    <div class="answer" id="answer" style="display: none;">
+      <p>(Demorei um tempo pra fazer isso, tava planejando fazer antes de tentar puxar assunto ctg) (...)</p>
+    </div>
+  </div>
+
+  <!-- Áudios -->
+  <audio id="clickSound" src="click.mp3"></audio>
+  <audio id="yesSound" src="yes.mp3"></audio>
+  <audio id="noSound" src="no.mp3"></audio>
+  <audio id="bgMusic" src="fundo.mp3" loop></audio>
+
+  <script>
+    // Caveiras caindo
+    function createSkulls() {
+      const skullsContainer = document.getElementById('skulls-container');
+      const numberOfSkulls = 20;
+      for (let i = 0; i < numberOfSkulls; i++) {
+        const skull = document.createElement('div');
+        skull.className = 'skull';
+        skull.textContent = '💀';
+        skull.style.left = Math.random() * 100 + 'vw';
+        const duration = 3 + Math.random() * 3;
+        skull.style.animationDuration = duration + 's';
+        const delay = Math.random() * 2;
+        skull.style.animationDelay = delay + 's';
+        skullsContainer.appendChild(skull);
+      }
+    }
+
+    // Mensagem ao clicar no "Não"
+    function showNoMessage(button) {
+      const messages = [
+        "Você não tem escolha!",
+        "O destino já foi selado.",
+        "As trevas te esperam. Ninguém mandou recusar.",
+        "Seu sangue pertencerá a mim. 🧛"
+      ];
+      const message = messages[Math.floor(Math.random() * messages.length)];
+      const rect = button.getBoundingClientRect();
+      const msgEl = document.createElement('div');
+      msgEl.className = 'no-message';
+      msgEl.innerText = message;
+      msgEl.style.left = (rect.left + rect.width / 2) + 'px';
+      msgEl.style.top = (rect.top - 30) + 'px';
+      document.body.appendChild(msgEl);
+      setTimeout(() => { msgEl.remove(); }, 2000);
+    }
+
+    // Sons
+    function handleButtonClick(audioId) {
+      const clickSound = document.getElementById('clickSound');
+      if (clickSound) {
+        clickSound.currentTime = 0;
+        clickSound.play().catch(()=>{});
+      }
+      const specificSound = document.getElementById(audioId);
+      if (specificSound) {
+        specificSound.currentTime = 0;
+        specificSound.play().catch(()=>{});
+      }
+      const bgMusic = document.getElementById('bgMusic');
+      if (bgMusic) {
+        bgMusic.play().catch(()=>{});
+      }
+    }
+
+    // Clique no Sim
+    document.getElementById('yes').addEventListener('click', function() {
+      handleButtonClick('yesSound');
+      document.getElementById('question').style.display = 'none';
+      document.getElementById('answer').style.display = 'block';
+      createSkulls();
+      setTimeout(function() {
+        window.location.href = "https://youtu.be/IL4YmAxxQzM?si=XEuc4Yq9bkgb7kVB";
+      }, 15000);
+    });
+
+    // Clique no Não
+    document.getElementById('no').addEventListener('click', function() {
+      handleButtonClick('noSound');
+      const btnNo = document.getElementById('no');
+      const maxX = window.innerWidth - btnNo.offsetWidth;
+      const maxY = window.innerHeight - btnNo.offsetHeight;
+      const randomX = Math.floor(Math.random() * maxX);
+      const randomY = Math.floor(Math.random() * maxY);
+      btnNo.style.left = randomX + 'px';
+      btnNo.style.top = randomY + 'px';
+      showNoMessage(btnNo);
+    });
+  </script>
+</body>
+</html>
